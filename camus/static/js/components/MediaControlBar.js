@@ -1,10 +1,10 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
-import {setLocalAudio, setLocalVideo} from '../slices/feeds';
-import {updateAudioDevice, updateVideoDevice, updateDisplayDevice} from '../slices/devices';
-import {getUserVideo, getUserAudio, getDisplayMedia} from '../mediaUtils.js';
-import ExitDialog from './ExitDialog.js';
+import { connect } from 'react-redux';
+import { setLocalAudio, setLocalVideo } from '../slices/feeds';
+import { updateAudioDevice, updateVideoDevice, updateDisplayDevice } from '../slices/devices';
+import { getUserVideo, getUserAudio, getDisplayMedia } from '../mediaUtils';
+import ExitDialog from './ExitDialog';
 
 class MediaControlBar extends Component {
     constructor(props) {
@@ -31,7 +31,13 @@ class MediaControlBar extends Component {
         };
 
         return (
-            <div className='media-control-bar'>
+            <section
+                className='media-control-bar'
+                aria-labelledby='media-controls-title'
+            >
+                <h1 id='media-controls-title' className='sr-only'>
+                    Media controls
+                </h1>
                 <MediaToggleButton
                     kind={'camera'}
                     deviceConstraints={videoConstraints}
@@ -39,6 +45,7 @@ class MediaControlBar extends Component {
                     onTrack={this.onTrack}
                     getMedia={getUserVideo}
                     icons={{on: 'videocam', off: 'videocam_off'}}
+                    ariaLabel='Toggle enable camera'
                 />
                 <MediaToggleButton
                     kind={'mic'}
@@ -47,6 +54,7 @@ class MediaControlBar extends Component {
                     onTrack={this.onTrack}
                     getMedia={getUserAudio}
                     icons={{on: 'mic', off: 'mic_off'}}
+                    ariaLabel='Toggle enable microphone'
                 />
                 <MediaToggleButton
                     kind={'display'}
@@ -55,9 +63,10 @@ class MediaControlBar extends Component {
                     onTrack={this.onTrack}
                     getMedia={getDisplayMedia}
                     icons={{on: 'screen_share', off: 'stop_screen_share'}}
+                    ariaLabel='Toggle enable desktop sharing'
                 />
                 <HangUpButton />
-            </div>
+            </section>
         );
     }
 
@@ -118,7 +127,13 @@ function select(state) {
 
 export default connect(
     select,
-    {setLocalAudio, setLocalVideo, updateAudioDevice, updateVideoDevice, updateDisplayDevice}
+    {
+        setLocalAudio,
+        setLocalVideo,
+        updateAudioDevice,
+        updateVideoDevice,
+        updateDisplayDevice
+    }
 )(MediaControlBar);
 
 class MediaToggleButton extends Component {
@@ -135,7 +150,10 @@ class MediaToggleButton extends Component {
 
     render() {
         return (
-            <button onClick={this.onClick}>
+            <button onClick={this.onClick}
+                aria-label={this.props.ariaLabel}
+                aria-pressed={this.props.isOn}
+            >
                 <i className='material-icons'>
                     {this.props.isOn ? this.props.icons.on : this.props.icons.off}
                 </i>
@@ -187,7 +205,8 @@ MediaToggleButton.propTypes = {
     isOn: PropTypes.bool.isRequired,
     icons: PropTypes.object.isRequired,
     getMedia: PropTypes.func.isRequired,
-    onTrack: PropTypes.func.isRequired
+    onTrack: PropTypes.func.isRequired,
+    ariaLabel: PropTypes.string.isRequired
 };
 
 class HangUpButton extends Component {
@@ -207,7 +226,7 @@ class HangUpButton extends Component {
             { this.state.showExitDialog &&
             <ExitDialog onClose={this.onCloseExitDialog} />
             }
-            <button onClick={this.onClick}>
+            <button onClick={this.onClick} aria-label='Hang up'>
                 <i className='material-icons' style={{color: '#a00'}}>call_end</i>
             </button>
         </>);
